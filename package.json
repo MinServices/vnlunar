@@ -1,6 +1,6 @@
 {
   "name": "@min98/vnlunar",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Vietnamese Lunar Calendar Library - TypeScript version with modular architecture",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
