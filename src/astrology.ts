@@ -1,64 +1,26 @@
 /**
- * Astrology functions: 12 Stars, 28 Mansions, Nayin, etc.
+ * Astrology functions: 28 Mansions, Nayin, good-day selection.
+ * (Trực / 12 Thần / Hoàng-Hắc Đạo nằm trong almanac.ts và được re-export ở đây để tương thích.)
  */
 
-import type { 
-  Star12Info, 
-  God12Info, 
-  Construction12Info, 
-  Mansion28Info, 
-  NayinInfo, 
-  DayTypeInfo,
-  DaySelectionResult 
+import type {
+  Mansion28Info,
+  NayinInfo,
+  DaySelectionResult,
+  AlmanacOptions,
+  Star12Info
 } from './types';
-import { 
-  STARS_12, 
-  GODS_12, 
-  CONSTRUCTIONS_12, 
-  MANSIONS_28, 
-  NAYIN_60,
-  CAN,
-  CHI 
-} from './constants';
-import { jdn2date, convert_solar_to_lunar, jdn } from './core';
+import { MANSIONS_28, NAYIN_60, CAN, CHI, GODS_12, STARS_12 } from './constants';
+import { jdn } from './core';
+import { get_construction_index, get_god_index } from './almanac';
+
+export { get_12_stars, get_12_gods, get_12_constructions, get_day_type } from './almanac';
+
+/** Chỉ số (trong GODS_12) của 6 Thần Hoàng Đạo */
+const HOANG_DAO_GOD_INDEXES = [0, 1, 4, 5, 7, 10];
 
 /**
- * Get 12 Day Officer (12 Sao Kiến Trừ)
- * @param lunarDay Lunar day
- * @param lunarMonth Lunar month
- * @returns Star information
- */
-export function get_12_stars(lunarDay: number, lunarMonth: number): Star12Info {
-  let starIndex = (lunarMonth + lunarDay - 2) % 12;
-  if (starIndex < 0) starIndex += 12;
-  return STARS_12[starIndex];
-}
-
-/**
- * Get 12 Gods (Hoàng Đạo/Hắc Đạo)
- * @param jd Julian Day Number
- * @returns God information
- */
-export function get_12_gods(jd: number): God12Info {
-  const chiNgay = (jd + 1) % 12;
-  const godIndex = (chiNgay + 8) % 12;
-  return GODS_12[godIndex];
-}
-
-/**
- * Get 12 Day Construction (Thập Nhị Trực)
- * @param lunarDay Lunar day
- * @param lunarMonth Lunar month
- * @returns Construction information
- */
-export function get_12_constructions(lunarDay: number, lunarMonth: number): Construction12Info {
-  let index = (lunarDay + lunarMonth + 2) % 12;
-  if (index < 0) index += 12;
-  return CONSTRUCTIONS_12[index];
-}
-
-/**
- * Get 28 Lunar Mansion
+ * Get 28 Lunar Mansion (Nhị Thập Bát Tú)
  * @param jd Julian Day Number
  * @returns Mansion information
  */
@@ -68,141 +30,132 @@ export function get_28_mansions(jd: number): Mansion28Info {
 }
 
 /**
- * Get Nayin (Nạp Âm) of the day
- * @param jd Julian Day Number
- * @returns Nayin information
+ * Chỉ số Lục Thập Hoa Giáp (0 = Giáp Tý ... 59 = Quý Hợi) từ chỉ số Can và Chi
  */
-export function get_nayin(jd: number): NayinInfo {
-  const canIndex = (jd + 9) % 10;
-  const chiIndex = (jd + 1) % 12;
+export function get_sexagenary_index(canIndex: number, chiIndex: number): number {
+  // Nghiệm duy nhất của i ≡ can (mod 10), i ≡ chi (mod 12) với can, chi cùng tính chẵn lẻ
+  return (6 * canIndex - 5 * chiIndex + 60) % 60;
+}
 
-  let can_chi_60_index = -1;
-  for (let i = 0; i < 60; i++) {
-    if (i % 10 === canIndex && i % 12 === chiIndex) {
-      can_chi_60_index = i;
-      break;
-    }
-  }
+/**
+ * Lấy hành từ tên Nạp Âm
+ */
+export function get_nayin_element(nayinName: string): string {
+  if (nayinName.indexOf("Kim") !== -1) return "Kim";
+  if (nayinName.indexOf("Mộc") !== -1) return "Mộc";
+  if (nayinName.indexOf("Thủy") !== -1) return "Thủy";
+  if (nayinName.indexOf("Hỏa") !== -1 || nayinName.indexOf("Hoả") !== -1) return "Hỏa";
+  if (nayinName.indexOf("Thổ") !== -1) return "Thổ";
+  return "";
+}
 
-  const nayin_index = Math.floor(can_chi_60_index / 2);
-  const nayin_name = NAYIN_60[nayin_index];
-  let element = "";
-
-  if (nayin_name.indexOf("Kim") !== -1) element = "Kim";
-  else if (nayin_name.indexOf("Mộc") !== -1) element = "Mộc";
-  else if (nayin_name.indexOf("Thủy") !== -1) element = "Thủy";
-  else if (nayin_name.indexOf("Hỏa") !== -1 || nayin_name.indexOf("Hoả") !== -1) element = "Hỏa";
-  else if (nayin_name.indexOf("Thổ") !== -1) element = "Thổ";
-
+/**
+ * Nạp Âm theo chỉ số Can, Chi
+ */
+export function get_nayin_by_can_chi(canIndex: number, chiIndex: number): NayinInfo {
+  const name = NAYIN_60[get_sexagenary_index(canIndex, chiIndex)];
   return {
-    name: nayin_name,
-    element: element,
+    name,
+    element: get_nayin_element(name),
     can: CAN[canIndex],
     chi: CHI[chiIndex]
   };
 }
 
 /**
- * Check if day is Hoàng Đạo or Hắc Đạo
- * @param lunarDay Lunar day
- * @param lunarMonth Lunar month
- * @returns Auspicious/Inauspicious information
+ * Get Nayin (Nạp Âm) of the day
+ * @param jd Julian Day Number
+ * @returns Nayin information
  */
-export function get_day_type(lunarDay: number, lunarMonth: number): DayTypeInfo {
-  const star = get_12_stars(lunarDay, lunarMonth);
-  const hoangDao = ["Kiến", "Mãn", "Định", "Thành", "Thu", "Khai"];
-  const hacDao = ["Trừ", "Bình", "Chấp", "Phá", "Nguy", "Bế"];
-
-  const isHoangDao = hoangDao.indexOf(star.name) !== -1;
-  const isHacDao = hacDao.indexOf(star.name) !== -1;
-
-  return {
-    type: isHoangDao ? "Hoàng Đạo" : "Hắc Đạo",
-    star: star.name,
-    good: isHoangDao,
-    bad: isHacDao,
-    desc: isHoangDao 
-      ? "Ngày Hoàng Đạo - Tốt, thuận lợi" 
-      : "Ngày Hắc Đạo - Xấu, nên tránh"
-  };
+export function get_nayin(jd: number): NayinInfo {
+  return get_nayin_by_can_chi((jd + 9) % 10, (jd + 1) % 12);
 }
 
 /**
- * Check if day is good for specific activity
+ * Trực phù hợp cho từng loại việc
+ */
+export const GOOD_CONSTRUCTIONS_FOR_ACTIVITY: Record<string, string[]> = {
+  wedding: ["Định", "Thành", "Khai"],
+  construction: ["Định", "Thành", "Khai"],
+  travel: ["Kiến", "Mãn", "Thành", "Khai"],
+  opening: ["Mãn", "Định", "Thành", "Khai"],
+  moving: ["Định", "Thành", "Khai"],
+  investment: ["Mãn", "Thành", "Thu", "Khai"]
+};
+
+const ACTIVITY_NAMES: Record<string, string> = {
+  wedding: 'Cưới hỏi',
+  construction: 'Xây nhà, khởi công',
+  travel: 'Di chuyển, xuất hành',
+  opening: 'Khai trương, khai giảng',
+  moving: 'Chuyển nhà',
+  investment: 'Đầu tư, kinh doanh'
+};
+
+/**
+ * Check if day is good for specific activity.
+ * Ngày tốt = ngày Hoàng Đạo (12 Thần) VÀ Trực nằm trong danh sách hợp với việc.
  * @param jd Julian Day Number
- * @param activity Activity type: "wedding", "construction", "travel", "opening", "moving", "investment"
+ * @param activity "wedding" | "construction" | "travel" | "opening" | "moving" | "investment"
+ * @param options Tùy chọn trucBasis / godBasis
  * @returns Day selection result
  */
-export function check_good_day(jd: number, activity: string): DaySelectionResult {
-  const solarDate = jdn2date(jd);
-  const lunar = convert_solar_to_lunar(solarDate[0], solarDate[1], solarDate[2], 7.0);
-  const star = get_12_stars(lunar.day, lunar.month);
-  
-  const good_for_activity: Record<string, string[]> = {
-    "wedding": ["Kiến", "Mãn", "Định", "Thành", "Khai"],
-    "construction": ["Kiến", "Định", "Thành", "Khai"],
-    "travel": ["Kiến", "Mãn", "Thành", "Khai"],
-    "opening": ["Kiến", "Thành", "Khai", "Thu"],
-    "moving": ["Kiến", "Mãn", "Thành"],
-    "investment": ["Định", "Thành", "Thu", "Khai"]
-  };
-  const job_names = [
-    { key: 'wedding', name: 'Cưới hỏi' },
-    { key: 'construction', name: 'Xây nhà, khởi công' },
-    { key: 'travel', name: 'Di chuyển, xuất hành' },
-    { key: 'opening', name: 'Khai trương, khai giảng' },
-    { key: 'moving', name: 'Chuyển nhà' },
-    { key: 'investment', name: 'Đầu tư, kinh doanh' }
-  ];
-  const good_list = good_for_activity[activity] || [];
-  const is_good = good_list.indexOf(star.name) !== -1;
-  let activity_name = job_names.find(j => j.key === activity)?.name || activity;
+export function check_good_day(jd: number, activity: string, options?: AlmanacOptions): DaySelectionResult {
+  const star = STARS_12[get_construction_index(jd, options)];
+  const godIndex = get_god_index(jd, options);
+  const god = GODS_12[godIndex];
+  const isHoangDao = HOANG_DAO_GOD_INDEXES.indexOf(godIndex) !== -1;
+
+  const goodList = GOOD_CONSTRUCTIONS_FOR_ACTIVITY[activity] || [];
+  const trucOk = goodList.indexOf(star.name) !== -1;
+  const isGood = isHoangDao && trucOk;
+  const activityName = ACTIVITY_NAMES[activity] || activity;
+  const dayLabel = `Ngày Trực ${star.name}, ${god.name} (${isHoangDao ? 'Hoàng Đạo' : 'Hắc Đạo'})`;
+
   return {
-    star: star,
-    activity: activity,
-    good: is_good,
-    description: is_good 
-      ? "Ngày " + star.name + " - TỐT cho " + activity_name
-      : "Ngày " + star.name + " - KHÔNG TỐT cho " + activity_name
+    star,
+    god,
+    activity,
+    good: isGood,
+    description: isGood
+      ? `${dayLabel} - TỐT cho ${activityName}`
+      : `${dayLabel} - KHÔNG TỐT cho ${activityName}`
   };
 }
 
 /**
- * Find good days in a month for specific activity
+ * Find good days in a solar month for specific activity
  * @param month Month
  * @param year Year
  * @param activity Activity type
+ * @param options Tùy chọn trucBasis / godBasis
  * @returns Array of good days
  */
-export function find_good_days(month: number, year: number, activity: string): Array<{
+export function find_good_days(month: number, year: number, activity: string, options?: AlmanacOptions): Array<{
   day: number;
   month: number;
   year: number;
   jd: number;
   star: Star12Info;
+  god: string;
 }> {
-  const good_days: Array<{day: number; month: number; year: number; jd: number; star: Star12Info}> = [];
-  let daysInMonth = 31;
+  const goodDays: Array<{ day: number; month: number; year: number; jd: number; star: Star12Info; god: string }> = [];
+  const start = jdn(1, month, year);
+  const end = month === 12 ? jdn(1, 1, year + 1) : jdn(1, month + 1, year);
 
-  if (month === 2) {
-    daysInMonth = (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 29 : 28;
-  } else if ([4, 6, 9, 11].indexOf(month) !== -1) {
-    daysInMonth = 30;
-  }
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const jd = jdn(day, month, year);
-    const result = check_good_day(jd, activity);
+  for (let jd = start; jd < end; jd++) {
+    const result = check_good_day(jd, activity, options);
     if (result.good) {
-      good_days.push({
-        day: day,
-        month: month,
-        year: year,
-        jd: jd,
-        star: result.star
+      goodDays.push({
+        day: jd - start + 1,
+        month,
+        year,
+        jd,
+        star: result.star,
+        god: result.god ? result.god.name : ''
       });
     }
   }
 
-  return good_days;
+  return goodDays;
 }

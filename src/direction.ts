@@ -12,9 +12,12 @@ import type {
   TravelHoursInfo
 } from './types';
 import { CHI, CHI_ANIMALS, CAN, JOY_GOD_DIR, WEALTH_GOD_DIR, FORTUNE_GOD_DIR, TRAVEL_HOURS_LY } from './constants';
+import { get_nayin_by_can_chi } from './astrology';
+import { get_element_relation } from './calendar';
 
 /**
  * Direction data for Ngọc Hạp Thông Thư
+ * @experimental Chưa có nguồn đối chiếu - không còn đưa vào getFullInfo.
  */
 const NGOC_HAP_THONG_THU: Record<number, { good: string[]; bad: string[]; description: string }> = {
   0: { good: ["Nam", "Bắc"], bad: ["Đông", "Tây"], description: "Ngày Tý: Tốt hướng Nam-Bắc, tránh Đông-Tây" },
@@ -33,6 +36,7 @@ const NGOC_HAP_THONG_THU: Record<number, { good: string[]; bad: string[]; descri
 
 /**
  * Travel direction by age
+ * @experimental Chưa có nguồn đối chiếu.
  */
 const AGE_DIRECTIONS: Record<number, { good: string[]; bad: string[]; name: string }> = {
   0: { good: ["Đông", "Tây Nam"], bad: ["Nam", "Bắc"], name: "Tý (Chuột)" },
@@ -50,104 +54,58 @@ const AGE_DIRECTIONS: Record<number, { good: string[]; bad: string[]; name: stri
 };
 
 /**
- * Get conflicting ages for a day
+ * Get conflicting ages for a day (Tuổi xung ngày)
+ *
+ * Quy tắc (khớp các lịch vạn niên đối chiếu, xem docs/tuoi-xung.md - mới khớp một phần):
+ * (A) Tuổi xung chính (*): Chi lục xung với chi ngày VÀ Nạp Âm khắc / bị khắc Nạp Âm ngày.
+ * (B) Tuổi xung phụ: cùng chi ngày, Can bị Can ngày khắc (Can ngày + 4) VÀ Nạp Âm khắc / bị khắc.
+ *
  * @param jd Julian Day Number
- * @param currentYear Current year
+ * @param currentYear Năm dùng để tính tuổi (nên truyền năm âm lịch)
  * @returns Age conflict information
  */
 export function get_conflicting_ages(jd: number, currentYear: number): ConflictingAgeInfo {
   const canNgay = (jd + 9) % 10;
   const chiNgay = (jd + 1) % 12;
   const xungChiIndex = (chiNgay + 6) % 12;
+  const dayNayin = get_nayin_by_can_chi(canNgay, chiNgay);
 
-  const conflicting_age_list: Array<{
-    year: number;
-    can_chi: string;
-    age: number;
-    chi: string;
-    animal: string;
-  }> = [];
-
-  // Quy tắc tuổi xung:
-  // 1. Tuổi xung chính (*): Can cách -6 + Chi xung
-  // 2. Tuổi xung phụ: Can cách -2 + Chi xung
-  // 3. Tuổi tự xung: Can cách -6 + Chi cùng ngày
-  // 4. Tam Hình: Các Chi trong nhóm tam hợp
-
-  // Tam Hình (Tam Hợp) - 4 nhóm
-  const tamHinh: Record<number, number[]> = {
-    0: [8, 4],   // Tý -> Thân, Thìn (Tam Hợp Thủy)
-    1: [9, 5],   // Sửu -> Dậu, Tỵ (Tam Hợp Kim)
-    2: [6, 10],  // Dần -> Ngọ, Tuất (Tam Hợp Hỏa)
-    3: [11, 7],  // Mão -> Hợi, Mùi (Tam Hợp Mộc)
-    4: [0, 8],   // Thìn -> Tý, Thân (Tam Hợp Thủy)
-    5: [9, 1],   // Tỵ -> Dậu, Sửu (Tam Hợp Kim)
-    6: [2, 10],  // Ngọ -> Dần, Tuất (Tam Hợp Hỏa)
-    7: [11, 3],  // Mùi -> Hợi, Mão (Tam Hợp Mộc)
-    8: [0, 4],   // Thân -> Tý, Thìn (Tam Hợp Thủy)
-    9: [5, 1],   // Dậu -> Tỵ, Sửu (Tam Hợp Kim)
-    10: [6, 2],  // Tuất -> Ngọ, Dần (Tam Hợp Hỏa)
-    11: [3, 7]   // Hợi -> Mão, Mùi (Tam Hợp Mộc)
+  const isKhac = (canIndex: number, chiIndex: number): boolean => {
+    const rel = get_element_relation(dayNayin.element, get_nayin_by_can_chi(canIndex, chiIndex).element);
+    return rel === "khắc" || rel === "bị khắc";
   };
 
-  // Can chính và phụ
-  const canXungChinh = (canNgay - 6 + 10) % 10;
-  const canXungPhu = (canNgay - 2 + 10) % 10;
+  const candidates: Array<{ can: number; chi: number; primary: boolean; reason: string }> = [];
 
-  // Danh sách các tuổi xung cần tìm
-  const xungTypes: Array<{can: number, chi: number, priority: number, hasStar: boolean}> = [];
-
-  // 1. Tuổi xung chính với Chi xung (*) - ưu tiên cao nhất
-  xungTypes.push({can: canXungChinh, chi: xungChiIndex, priority: 1, hasStar: true});
-
-  // 2. Tuổi xung phụ với Chi xung
-  if (canXungPhu !== canXungChinh) {
-    xungTypes.push({can: canXungPhu, chi: xungChiIndex, priority: 2, hasStar: false});
-  }
-
-  // 3. Tuổi tự xung (Can xung chính + Chi cùng ngày)
-  if (chiNgay !== xungChiIndex) {
-    xungTypes.push({can: canXungChinh, chi: chiNgay, priority: 3, hasStar: false});
-  }
-
-  // 4. Tam Hình - Các Chi trong nhóm tam hợp với ngày
-  const tamHinhChis = tamHinh[chiNgay] || [];
-  tamHinhChis.forEach((chi, idx) => {
-    // Sử dụng Can xung phụ cho Tam Hình
-    xungTypes.push({can: canXungPhu, chi: chi, priority: 4 + idx, hasStar: false});
-  });
-
-  // 5. Thêm tuổi xung phụ với Chi cùng ngày nếu khác với tuổi tự xung
-  if (canXungPhu !== canXungChinh && chiNgay !== xungChiIndex) {
-    xungTypes.push({can: canXungPhu, chi: chiNgay, priority: 10, hasStar: false});
-  }
-
-  // Tìm năm sinh cho mỗi loại xung
-  const seen_can_chi = new Set<string>();
-  
-  xungTypes.forEach((type) => {
-    for (let age = 1; age <= 120; age++) {
-      const year = currentYear - age;
-      const yearCan = (year + 6) % 10;
-      const yearChi = (year + 8) % 12;
-
-      if (yearCan === type.can && yearChi === type.chi) {
-        const can_chi_str = CAN[yearCan] + " " + CHI[yearChi];
-        const key = can_chi_str + (type.hasStar ? '*' : '');
-        
-        if (!seen_can_chi.has(can_chi_str)) {
-          seen_can_chi.add(can_chi_str);
-          conflicting_age_list.push({
-            year: year,
-            can_chi: key,
-            age: age,
-            chi: CHI[yearChi],
-            animal: CHI_ANIMALS[yearChi]
-          });
-        }
-        break;
-      }
+  // (A) Chi xung + Nạp Âm khắc
+  for (let can = xungChiIndex % 2; can < 10; can += 2) {
+    if (isKhac(can, xungChiIndex)) {
+      candidates.push({ can, chi: xungChiIndex, primary: true, reason: "Địa chi xung, Nạp Âm khắc" });
     }
+  }
+
+  // (B) Cùng chi, Can bị khắc + Nạp Âm khắc
+  const canBiKhac = (canNgay + 4) % 10;
+  if (isKhac(canBiKhac, chiNgay)) {
+    candidates.push({ can: canBiKhac, chi: chiNgay, primary: false, reason: "Cùng chi, Thiên can khắc, Nạp Âm khắc" });
+  }
+
+  const conflicting_age_list: ConflictingAgeInfo['conflicting_ages'] = candidates.map((c) => {
+    // Năm sinh gần nhất (trước currentYear) có Can Chi này
+    let year = currentYear - 1;
+    while ((year + 6) % 10 !== c.can || (year + 8) % 12 !== c.chi) {
+      year--;
+    }
+    const canChi = CAN[c.can] + " " + CHI[c.chi];
+    return {
+      year,
+      can_chi: canChi + (c.primary ? "*" : ""),
+      age: currentYear - year,
+      chi: CHI[c.chi],
+      animal: CHI_ANIMALS[c.chi],
+      primary: c.primary,
+      reason: c.reason
+    };
   });
 
   return {
@@ -155,8 +113,9 @@ export function get_conflicting_ages(jd: number, currentYear: number): Conflicti
     day_animal: CHI_ANIMALS[chiNgay],
     conflict_chi: CHI[xungChiIndex],
     conflict_animal: CHI_ANIMALS[xungChiIndex],
-    description: "Ngày " + CHI[chiNgay] + " (" + CHI_ANIMALS[chiNgay] + ") xung với tuổi " + CHI[xungChiIndex] + " (" + CHI_ANIMALS[xungChiIndex] + ")",
-    conflicting_ages: conflicting_age_list.slice(0, 5),
+    description: "Ngày " + CAN[canNgay] + " " + CHI[chiNgay] + " (" + dayNayin.name + ") xung với tuổi: " +
+      conflicting_age_list.map((a) => a.can_chi.replace("*", "")).join(", "),
+    conflicting_ages: conflicting_age_list,
     note: "Người tuổi " + CHI_ANIMALS[xungChiIndex] + " nên cẩn thận trong ngày này"
   };
 }
@@ -190,13 +149,14 @@ export function check_age_conflict(year1: number, year2: number): {
     animal2: CHI_ANIMALS[chi2],
     xung: isXung,
     description: isXung
-      ? "Tuổi " + CHI_ANIMALS[chi1] + " và " + CHI_ANIMALS[chi2] + " XÁ XUNG (kỵ)"
+      ? "Tuổi " + CHI_ANIMALS[chi1] + " và " + CHI_ANIMALS[chi2] + " XUNG (lục xung, kỵ)"
       : "Tuổi " + CHI_ANIMALS[chi1] + " và " + CHI_ANIMALS[chi2] + " không xung"
   };
 }
 
 /**
  * Get Ngọc Hạp Thông Thư - Good/bad directions
+ * @experimental Bảng hướng theo chi ngày chưa có nguồn đối chiếu; dùng get_god_directions cho Hỷ/Tài thần.
  * @param jd Julian Day Number
  * @returns Direction information
  */
@@ -215,7 +175,7 @@ export function get_direction_info(jd: number): DirectionInfo {
 }
 
 /**
- * Get gods directions by day Can
+ * Get gods directions by day Can (Hỷ Thần, Tài Thần đã đối chiếu; Phúc Thần chưa đối chiếu)
  * @param jd Julian Day Number
  * @returns Gods direction information
  */
@@ -233,6 +193,7 @@ export function get_god_directions(jd: number): GodDirectionInfo {
 
 /**
  * Get good travel directions by age
+ * @experimental Chưa có nguồn đối chiếu.
  * @param birth_year Birth year
  * @returns Travel direction by age
  */

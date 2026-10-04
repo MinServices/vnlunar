@@ -19,7 +19,8 @@
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "prepare": "npm run build",
-    "test": "node tests/test-all.js"
+    "test": "node tests/test-all.js && node --test tests/accuracy.test.js",
+    "gen:fixtures": "node scripts/gen-fixtures.js"
   },
   "keywords": [
     "lunar",

@@ -121,94 +121,98 @@ export const CHI_ELEMENTS: string[] = [
   ELEMENT.EARTH, ELEMENT.WATER    // Tuất = Thổ, Hợi = Thủy
 ];
 
-// 12 Day Officers (12 Sao Kiến Trừ / 12 Stars)
+// 12 Day Officers (Thập Nhị Trực / Kiến Trừ thập nhị khách)
+// Trạng thái theo câu quyết cổ: "Kiến Mãn Bình Thu hắc, Trừ Nguy Định Chấp hoàng,
+// Thành Khai giai khả dụng, Bế Phá bất tương đương".
+// Thứ tự: Kiến, Trừ, Mãn, Bình, Định, Chấp, Phá, Nguy, Thành, Thu, Khai, Bế.
 export const STARS_12: Star12Info[] = [
-  { name: "Kiến", status: "good", color: "green", description: "Khai trương, cưới hỏi, xuất hành, xây dựng" },
-  { name: "Trừ", status: "bad", color: "red", description: "Xấu, chỉ tốt cho trừ bệnh, dọn dẹp, phá cũ" },
-  { name: "Mãn", status: "good", color: "green", description: "Tốt cho hội họp, cưới hỏi, khánh thành, cầu tài" },
-  { name: "Bình", status: "neutral", color: "orange", description: "Trung bình, an táng, tu bổ" },
-  { name: "Định", status: "good", color: "green", description: "Tốt cho ký kết, cưới hỏi, xây dựng, khai trương" },
-  { name: "Chấp", status: "neutral", color: "orange", description: "Tốt cho xây dựng, an táng, không tốt cho xuất hành" },
-  { name: "Phá", status: "bad", color: "red", description: "Rất xấu, tránh mọi việc quan trọng" },
-  { name: "Nguy", status: "bad", color: "red", description: "Nguy hiểm, tránh xuất hành, động thổ, cưới hỏi" },
-  { name: "Thành", status: "good", color: "green", description: "Rất tốt, mọi việc đều thuận lợi" },
-  { name: "Thu", status: "good", color: "green", description: "Tốt cho thu hoạch, kết quả, cầu tài" },
-  { name: "Khai", status: "good", color: "green", description: "Khai trương, xuất hành, khai công, mọi việc đều tốt" },
-  { name: "Bế", status: "bad", color: "red", description: "Đóng cửa, tránh mọi việc quan trọng, chỉ tốt cho tu tâm" }
+  { name: "Kiến", status: "neutral", color: "orange", description: "Tốt cho xuất hành, nhậm chức, cầu tài; kỵ động thổ, đào giếng, an táng" },
+  { name: "Trừ", status: "good", color: "green", description: "Tốt cho trừ bệnh, giải hạn, dọn dẹp, phá bỏ cái cũ; kỵ cưới hỏi, khai trương" },
+  { name: "Mãn", status: "neutral", color: "orange", description: "Tốt cho cầu tài, cầu phúc, khai trương, nhập kho; kỵ nhậm chức, kiện tụng" },
+  { name: "Bình", status: "neutral", color: "orange", description: "Tốt cho sửa sang nhà cửa, làm đường; việc lớn nên cân nhắc" },
+  { name: "Định", status: "good", color: "green", description: "Tốt cho động thổ, nhập học, cầu thân, ký kết; kỵ kiện tụng, xuất hành xa" },
+  { name: "Chấp", status: "good", color: "green", description: "Tốt cho xây dựng, sửa chữa, trồng trọt, tuyển người; kỵ xuất hành, chuyển nhà" },
+  { name: "Phá", status: "bad", color: "red", description: "Chỉ tốt cho phá dỡ, chữa bệnh; kỵ mọi việc lớn" },
+  { name: "Nguy", status: "good", color: "green", description: "Tốt cho cúng lễ, cầu an; kỵ leo cao, đi sông nước, việc mạo hiểm" },
+  { name: "Thành", status: "good", color: "green", description: "Tốt cho cưới hỏi, khai trương, ký kết, nhập trạch, nhập học; kỵ kiện tụng" },
+  { name: "Thu", status: "neutral", color: "orange", description: "Tốt cho thu nợ, thu hoạch, nhập kho; kỵ khai trương, an táng, xuất hành" },
+  { name: "Khai", status: "good", color: "green", description: "Tốt cho khai trương, xuất hành, nhập học, cưới hỏi, làm nhà; kỵ an táng" },
+  { name: "Bế", status: "bad", color: "red", description: "Chỉ tốt cho đắp đê, lấp hố, an táng; kỵ khai trương, xuất hành, cưới hỏi" }
 ];
 
-// 12 Day Construction (Thập Nhị Trực / 12 Constructions)
+// 12 Day Construction (Thập Nhị Trực) - chi tiết việc nên làm / nên tránh
 export const CONSTRUCTIONS_12: Construction12Info[] = [
   {
-    name: "Trực kiến",
-    good_for: ["Động thổ", "san nền đắp nền", "lên quan nhậm chức", "xuất hành", "khai trương tàu thuyền", "khởi công làm lò"],
-    bad_for: ["Khai trương", "khởi công xây cất và chôn cất"]
+    name: "Trực Kiến", short_name: "Kiến", status: "neutral",
+    good_for: ["Xuất hành", "Nhậm chức", "Cầu tài", "Gặp gỡ đối tác"],
+    bad_for: ["Động thổ", "Đào giếng", "An táng", "Mở kho"]
   },
   {
-    name: "Trực trừ",
-    good_for: ["Giải trừ", "tắm gội", "chỉnh dung", "cạo đầu", "chỉnh tay chân móng", "cầu y trị bệnh", "quét dọn nhà cửa"],
-    bad_for: ["Mọi việc khác"]
+    name: "Trực Trừ", short_name: "Trừ", status: "good",
+    good_for: ["Chữa bệnh", "Giải hạn, cúng giải trừ", "Tắm gội, dọn dẹp", "Phá dỡ nhà cũ"],
+    bad_for: ["Cưới hỏi", "Khai trương", "Xuất hành xa", "Ký kết, giao dịch lớn"]
   },
   {
-    name: "Trực mãn",
-    good_for: ["Tiến người", "may cắt", "dựng cột lên đòn dông", "kinh vệ", "khai trương", "lập khoán giao dịch", "nạp tài", "mở kho", "đắp lỗ lỗ rác", "sửa tường"],
-    bad_for: ["Tế tự", "cầu phúc", "cầu tự", "lên sách chương biểu", "ban chiếu", "ban ơn", "chiêu hiền cử nhân", "cất chính tà", "lên quan lâm chính", "hôn nhân kết hôn", "cầu y trị bệnh"]
+    name: "Trực Mãn", short_name: "Mãn", status: "neutral",
+    good_for: ["Cầu tài, cầu phúc", "Khai trương", "Nhập kho, nhập hàng", "Tế tự"],
+    bad_for: ["Nhậm chức", "Kiện tụng", "Chữa bệnh", "An táng"]
   },
   {
-    name: "Trực bình",
-    good_for: ["Tu sửa tường tường", "bình trị đạo đồ"],
-    bad_for: ["Cầu phúc cầu tự", "lên sách lên chương biểu", "ban chiếu", "ban ơn", "chiêu hiền cử nhân", "tuyên chính sự", "bố chính sự", "khánh tứ", "yến hội", "quan đái", "xuất hành", "an phủ biên cảnh", "tuyển tướng xuất sư", "lên quan lâm chính", "hôn nhân kết hôn", "nạp thái", "giá thú", "tiến người", "di chuyển", "an sàng", "giải trừ", "cầu y trị bệnh", "may cắt", "doanh kiến tu cung thất", "thiện thành quách", "trúc đê phòng tu tạo", "dựng cột lên đòn dông", "tu kho", "cổ đúc", "kinh vệ", "uẩn niệu", "khai trương lập khoán giao dịch", "nạp tài", "mở kho", "tu trí sản thất", "khai cừ xuyên giếng", "sưu tất phá thổ an táng", "khải san"]
+    name: "Trực Bình", short_name: "Bình", status: "neutral",
+    good_for: ["Sửa sang nhà cửa", "Làm đường, san nền", "Việc nhỏ thường ngày"],
+    bad_for: ["Cưới hỏi", "Khai trương", "Xuất hành xa", "Đào mương, khơi rãnh"]
   },
   {
-    name: "Trực định",
-    good_for: ["Quan đái"],
-    bad_for: ["Mọi việc khác"]
+    name: "Trực Định", short_name: "Định", status: "good",
+    good_for: ["Động thổ, san nền", "Nhập học", "Cầu thân, đính hôn", "Ký kết, giao dịch", "Mua bán gia súc"],
+    bad_for: ["Kiện tụng", "Xuất hành xa", "Chữa bệnh"]
   },
   {
-    name: "Trực chấp",
-    good_for: ["Bắt bớ"],
-    bad_for: ["Mọi việc khác"]
+    name: "Trực Chấp", short_name: "Chấp", status: "good",
+    good_for: ["Xây dựng, sửa chữa", "Trồng trọt", "Tuyển người, thuê người làm", "Bắt kẻ gian"],
+    bad_for: ["Xuất hành", "Mở kho, xuất tiền", "Chuyển nhà", "Khai trương"]
   },
   {
-    name: "Trực phá",
-    good_for: ["Cầu y trị bệnh"],
-    bad_for: ["Mọi việc khác"]
+    name: "Trực Phá", short_name: "Phá", status: "bad",
+    good_for: ["Phá dỡ nhà cũ", "Chữa bệnh", "Dọn dẹp, tiêu hủy đồ cũ"],
+    bad_for: ["Cưới hỏi", "Khai trương", "Ký kết", "Xuất hành", "Động thổ"]
   },
   {
-    name: "Trực nguy",
-    good_for: ["An phủ biên cảnh", "tuyển tướng", "an sàng"],
-    bad_for: ["Mọi việc khác"]
+    name: "Trực Nguy", short_name: "Nguy", status: "good",
+    good_for: ["Cúng lễ, cầu an", "An giường", "Việc nhỏ cần thận trọng"],
+    bad_for: ["Leo cao, đi sông nước", "Xuất hành xa", "Khai trương", "Đầu tư mạo hiểm"]
   },
   {
-    name: "Trực thành",
-    good_for: ["Nhập học", "an phủ biên cảnh", "di chuyển", "trúc đê phòng", "khai trương"],
-    bad_for: ["Mọi việc khác"]
+    name: "Trực Thành", short_name: "Thành", status: "good",
+    good_for: ["Cưới hỏi", "Khai trương", "Ký kết, giao dịch", "Nhập trạch, chuyển nhà", "Nhập học", "Xuất hành"],
+    bad_for: ["Kiện tụng, tranh chấp"]
   },
   {
-    name: "Trực thu",
-    good_for: ["Tiến người", "nạp tài", "bắt bớ", "thu tất"],
-    bad_for: ["Cầu phúc cầu tự", "lên sách lên chương biểu", "ban chiếu", "ban ơn", "chiêu hiền cử nhân", "tuyên chính sự", "bố chính sự", "khánh tứ", "yến hội", "quan đái", "xuất hành", "an phủ biên cảnh", "tuyển tướng xuất sư", "lên quan lâm chính", "hôn nhân kết hôn", "nạp thái", "giá thú", "di chuyển", "an sàng", "giải trừ", "cầu y trị bệnh", "may cắt", "doanh kiến tu cung thất", "thiện thành quách", "trúc đê phòng tu tạo", "dựng cột lên đòn dông", "cổ đúc", "kinh vệ", "uẩn niệu", "khai trương lập khoán giao dịch", "mở kho", "tu trí sản thất", "khai cừ xuyên giếng", "phá thổ an táng khải san"]
+    name: "Trực Thu", short_name: "Thu", status: "neutral",
+    good_for: ["Thu nợ, thu hoạch", "Nhập kho, mua hàng", "Cầu tài"],
+    bad_for: ["Khai trương", "An táng", "Xuất hành", "Chữa bệnh"]
   },
   {
-    name: "Trực khai",
-    good_for: ["Tế tự", "cầu phúc", "cầu tự", "lên sách lên chương biểu", "ban chiếu", "ban ơn", "chiêu hiền cử nhân", "tuyên chính sự", "tất cô lân", "tuyên chính sự", "tuyết oan", "khánh tứ", "yến hội", "nhập học", "xuất hành", "lên quan lâm chính", "di chuyển", "giải trừ", "cầu y trị bệnh", "may cắt", "tu cung thất", "thiện thành quách", "tu tạo", "tu kho", "khai trương", "tu trí sản thất", "khai cừ xuyên giếng", "an ngại", "sưu tất", "mục dưỡng"],
-    bad_for: ["Mọi việc khác"]
+    name: "Trực Khai", short_name: "Khai", status: "good",
+    good_for: ["Khai trương", "Xuất hành", "Nhập học", "Cưới hỏi", "Động thổ, làm nhà", "Nhậm chức"],
+    bad_for: ["An táng", "Động mồ mả", "Chặt cây"]
   },
   {
-    name: "Trực bế",
-    good_for: ["Trúc đê phòng", "đắp lỗ", "sửa tường"],
-    bad_for: ["Lên sách lên chương biểu", "ban chiếu", "ban ơn", "chiêu hiền cử nhân", "tuyên chính sự", "bố chính sự", "khánh tứ", "yến hội", "xuất hành", "xuất sư", "lên quan lâm chính", "hôn nhân kết hôn", "nạp thái", "giá thú", "tiến người", "di chuyển", "an sàng", "cầu y trị bệnh", "trị mục", "doanh kiến tu cung thất", "tu tạo", "dựng cột lên đòn dông", "khai trương", "mở kho", "tu trí sản thất", "khai cừ xuyên giếng"]
+    name: "Trực Bế", short_name: "Bế", status: "bad",
+    good_for: ["Đắp đê, lấp hố, sửa tường", "An táng", "Cất giữ, đóng kho"],
+    bad_for: ["Khai trương", "Xuất hành", "Cưới hỏi", "Chữa bệnh", "Nhậm chức"]
   }
 ];
 
-// 12 Gods (Hoàng Đạo / Hắc Đạo)
+// 12 Gods (12 Thần trực nhật - Hoàng Đạo / Hắc Đạo)
+// Hoàng Đạo: Thanh Long, Minh Đường, Kim Quỹ, Thiên Đức (Bảo Quang), Ngọc Đường, Tư Mệnh.
 export const GODS_12: God12Info[] = [
   { name: "Thanh Long", type: "auspicious", status: "good", description: "Hoàng Đạo - Tốt cho mọi việc" },
   { name: "Minh Đường", type: "auspicious", status: "good", description: "Hoàng Đạo - Tốt cho gặp gỡ, văn thư" },
   { name: "Thiên Hình", type: "inauspicious", status: "bad", description: "Hắc Đạo - Xấu, tránh kiện tụng" },
   { name: "Chu Tước", type: "inauspicious", status: "bad", description: "Hắc Đạo - Xấu, tránh tranh cãi" },
   { name: "Kim Quỹ", type: "auspicious", status: "good", description: "Hoàng Đạo - Tốt cho cầu tài, xuất hành" },
-  { name: "Thiên Đức", type: "auspicious", status: "good", description: "Hoàng Đạo - Rất tốt, quý nhân giúp đỡ" },
+  { name: "Thiên Đức", alias: "Bảo Quang", type: "auspicious", status: "good", description: "Hoàng Đạo (còn gọi Bảo Quang) - Rất tốt, quý nhân giúp đỡ" },
   { name: "Bạch Hổ", type: "inauspicious", status: "bad", description: "Hắc Đạo - Rất xấu, tránh mọi việc" },
   { name: "Ngọc Đường", type: "auspicious", status: "good", description: "Hoàng Đạo - Tốt cho cưới hỏi, gia đạo" },
   { name: "Thiên Lao", type: "inauspicious", status: "bad", description: "Hắc Đạo - Xấu, tránh kiện tụng" },
@@ -217,8 +221,8 @@ export const GODS_12: God12Info[] = [
   { name: "Câu Trần", type: "inauspicious", status: "bad", description: "Hắc Đạo - Xấu, tránh xuất hành" }
 ];
 
-// 60 Nayin
-export const NAYIN_60: string[] = [
+// 30 Nạp Âm (mỗi Nạp Âm ứng với một cặp Can Chi liên tiếp trong vòng Lục Thập Hoa Giáp)
+export const NAYIN_30: string[] = [
   "Hải Trung Kim", "Lư Trung Hỏa", "Đại Lâm Mộc", "Lộ Bàng Thổ", "Kiếm Phong Kim",
   "Sơn Đầu Hỏa", "Giản Hạ Thủy", "Thành Đầu Thổ", "Bạch Lạp Kim", "Dương Liễu Mộc",
   "Tuyền Trung Thủy", "Ốc Thượng Thổ", "Tích Lịch Hỏa", "Tòng Bách Mộc", "Trường Lưu Thủy",
@@ -227,42 +231,53 @@ export const NAYIN_60: string[] = [
   "Đại Khê Thủy", "Sa Trung Thổ", "Thiên Thượng Hỏa", "Thạch Lựu Mộc", "Đại Hải Thủy"
 ];
 
-// 28 Lunar Mansions (28 Tú Sao)
+// 60 Nạp Âm theo chỉ số Lục Thập Hoa Giáp (0 = Giáp Tý ... 59 = Quý Hợi)
+// Lưu ý: từ v2.0.0 đây là mảng 60 phần tử thật; v1.x là 30 phần tử (nay là NAYIN_30).
+export const NAYIN_60: string[] = NAYIN_30.reduce<string[]>((acc, name) => {
+  acc.push(name, name);
+  return acc;
+}, []);
+
+// 28 Lunar Mansions (Nhị Thập Bát Tú)
+// Cát tú (14): Giác, Phòng, Vĩ, Cơ, Đẩu, Thất, Bích, Lâu, Vị, Tất, Sâm, Tỉnh, Trương, Chẩn.
+// `element` theo Thất Diệu (Mộc, Kim, Thổ, Nhật, Nguyệt, Hỏa, Thủy).
 export const MANSIONS_28: Mansion28Info[] = [
-  { name: "Giác", animal: "Giao", element: "Mộc", good: true, description: "Tốt cho mọi việc, khai trương, cầu tài" },
-  { name: "Cang", animal: "Rồng", element: "Kim", good: true, description: "Hoàng Đạo - Tốt, quý nhân giúp đỡ, cầu quan" },
-  { name: "Đê", animal: "Lạc", element: "Thổ", good: false, description: "Hắc Đạo - Xấu, tranh tụng, bệnh tật" },
-  { name: "Phòng", animal: "Thỏ", element: "Nhật", good: true, description: "Hoàng Đạo - Tốt cho xây dựng, cưới hỏi" },
-  { name: "Tâm", animal: "Cáo", element: "Nguyệt", good: false, description: "Hắc Đạo - Xấu, cẩn thận tai họa" },
-  { name: "Vĩ", animal: "Hổ", element: "Hỏa", good: true, description: "Hoàng Đạo - Tốt, hưng vượng, cầu tài" },
-  { name: "Cơ", animal: "Báo", element: "Thủy", good: true, description: "Hoàng Đạo - Tốt cho xuất hành, gặp gỡ" },
-  { name: "Đẩu", animal: "Giải", element: "Mộc", good: true, description: "Hoàng Đạo - Tốt, may mắn, cầu phúc" },
-  { name: "Ngưu", animal: "Trâu", element: "Kim", good: false, description: "Hắc Đạo - Xấu, tránh cưới hỏi" },
-  { name: "Nữ", animal: "Dơi", element: "Thổ", good: false, description: "Hắc Đạo - Xấu cho công việc, xuất hành" },
-  { name: "Hư", animal: "Chuột", element: "Nhật", good: false, description: "Hắc Đạo - Xấu, tang ma, bệnh tật" },
-  { name: "Nguy", animal: "Yến", element: "Nguyệt", good: false, description: "Hắc Đạo - Nguy hiểm, tai nạn" },
-  { name: "Thất", animal: "Lợn", element: "Hỏa", good: true, description: "Hoàng Đạo - Tốt cho gia đạo, cúng tế" },
-  { name: "Bích", animal: "Dùn", element: "Thủy", good: true, description: "Hoàng Đạo - Tốt, phát tài, thịnh vượng" },
-  { name: "Khuê", animal: "Sói", element: "Mộc", good: false, description: "Hắc Đạo - Xấu, lừa đảo, thất bại" },
-  { name: "Lâu", animal: "Chó", element: "Kim", good: true, description: "Hoàng Đạo - Tốt cho xuất hành, cầu phúc" },
-  { name: "Vị", animal: "Trĩ", element: "Thổ", good: true, description: "Hoàng Đạo - Tốt, may mắn, khai trương" },
-  { name: "Mão", animal: "Gà", element: "Nhật", good: false, description: "Hắc Đạo - Xấu cho gia đạo, cưới hỏi" },
-  { name: "Tất", animal: "Quạ", element: "Nguyệt", good: true, description: "Hoàng Đạo - Tốt, săn bắt, xuất hành" },
-  { name: "Chủy", animal: "Khỉ", element: "Hỏa", good: false, description: "Hắc Đạo - Xấu, tang tóc, tránh cưới hỏi" },
-  { name: "Sâm", animal: "Vượn", element: "Thủy", good: true, description: "Hoàng Đạo - Tốt cho công danh, học hành" },
-  { name: "Tỉnh", animal: "Hãn", element: "Mộc", good: false, description: "Hắc Đạo - Xấu cho sức khỏe, bệnh tật" },
-  { name: "Quỷ", animal: "Dê", element: "Kim", good: false, description: "Hắc Đạo - Rất xấu, ma quỷ, tang tóc" },
-  { name: "Liễu", animal: "Nai", element: "Thổ", good: false, description: "Hắc Đạo - Xấu cho mọi việc, tránh cưới hỏi" },
-  { name: "Tinh", animal: "Ngựa", element: "Nhật", good: false, description: "Hắc Đạo - Xấu, quan tai, kiện tụng" },
-  { name: "Trương", animal: "Nai", element: "Nguyệt", good: true, description: "Hoàng Đạo - Tốt, thịnh vượng, khai trương" },
-  { name: "Dực", animal: "Rắn", element: "Hỏa", good: true, description: "Hoàng Đạo - Tốt cho tài lộc, cưới hỏi" },
-  { name: "Chẩn", animal: "Giun", element: "Thủy", good: true, description: "Hoàng Đạo - Tốt, hưng vượng, xây dựng" }
+  { name: "Giác", full_name: "Giác Mộc Giao", animal: "Giao (thuồng luồng)", element: "Mộc", good: true, description: "Cát tú - Tốt cho cưới hỏi, xây dựng, thi cử; kỵ an táng" },
+  { name: "Cang", full_name: "Cang Kim Long", animal: "Rồng", element: "Kim", good: false, description: "Hung tú - Kỵ cưới hỏi, xây dựng, an táng" },
+  { name: "Đê", full_name: "Đê Thổ Lạc", animal: "Lạc (lửng)", element: "Thổ", good: false, description: "Hung tú - Kỵ khởi công, cưới hỏi, đi đường thủy" },
+  { name: "Phòng", full_name: "Phòng Nhật Thố", animal: "Thỏ", element: "Nhật", good: true, description: "Cát tú - Tốt cho cưới hỏi, xây dựng, khai trương" },
+  { name: "Tâm", full_name: "Tâm Nguyệt Hồ", animal: "Cáo", element: "Nguyệt", good: false, description: "Hung tú - Kỵ khởi công, cưới hỏi, kiện tụng" },
+  { name: "Vĩ", full_name: "Vĩ Hỏa Hổ", animal: "Hổ", element: "Hỏa", good: true, description: "Cát tú - Tốt cho cưới hỏi, xây dựng, khai trương" },
+  { name: "Cơ", full_name: "Cơ Thủy Báo", animal: "Báo", element: "Thủy", good: true, description: "Cát tú - Tốt cho xây dựng, khai trương, an táng" },
+  { name: "Đẩu", full_name: "Đẩu Mộc Giải", animal: "Giải (cua)", element: "Mộc", good: true, description: "Cát tú - Tốt cho xây dựng, may mặc, khai trương" },
+  { name: "Ngưu", full_name: "Ngưu Kim Ngưu", animal: "Trâu", element: "Kim", good: false, description: "Hung tú - Kỵ cưới hỏi, xây dựng, khai trương" },
+  { name: "Nữ", full_name: "Nữ Thổ Bức", animal: "Dơi", element: "Thổ", good: false, description: "Hung tú - Kỵ cưới hỏi, kiện tụng, an táng" },
+  { name: "Hư", full_name: "Hư Nhật Thử", animal: "Chuột", element: "Nhật", good: false, description: "Hung tú - Kỵ cưới hỏi, xây dựng, khai trương" },
+  { name: "Nguy", full_name: "Nguy Nguyệt Yến", animal: "Chim én", element: "Nguyệt", good: false, description: "Hung tú - Kỵ xây dựng, đi sông nước, cưới hỏi" },
+  { name: "Thất", full_name: "Thất Hỏa Trư", animal: "Lợn", element: "Hỏa", good: true, description: "Cát tú - Tốt cho cưới hỏi, xây dựng, khai trương, an táng" },
+  { name: "Bích", full_name: "Bích Thủy Du", animal: "Du (rái cá)", element: "Thủy", good: true, description: "Cát tú - Tốt cho cưới hỏi, xây dựng, khai trương" },
+  { name: "Khuê", full_name: "Khuê Mộc Lang", animal: "Sói", element: "Mộc", good: false, description: "Hung tú - Kỵ khai trương, an táng; tốt cho nhập học" },
+  { name: "Lâu", full_name: "Lâu Kim Cẩu", animal: "Chó", element: "Kim", good: true, description: "Cát tú - Tốt cho cưới hỏi, xây dựng, khai trương" },
+  { name: "Vị", full_name: "Vị Thổ Trĩ", animal: "Chim trĩ", element: "Thổ", good: true, description: "Cát tú - Tốt cho cưới hỏi, xây dựng, kinh doanh" },
+  { name: "Mão", full_name: "Mão Nhật Kê", animal: "Gà", element: "Nhật", good: false, description: "Hung tú - Kỵ cưới hỏi, xây cất, khai trương" },
+  { name: "Tất", full_name: "Tất Nguyệt Ô", animal: "Quạ", element: "Nguyệt", good: true, description: "Cát tú - Tốt cho xây dựng, cưới hỏi, khai trương" },
+  { name: "Chủy", full_name: "Chủy Hỏa Hầu", animal: "Khỉ", element: "Hỏa", good: false, description: "Hung tú - Kỵ xây dựng, an táng" },
+  { name: "Sâm", full_name: "Sâm Thủy Viên", animal: "Vượn", element: "Thủy", good: true, description: "Cát tú - Tốt cho xây dựng, khai trương, nhập học; kỵ cưới hỏi" },
+  { name: "Tỉnh", full_name: "Tỉnh Mộc Hãn", animal: "Hãn (chó rừng)", element: "Mộc", good: true, description: "Cát tú - Tốt cho xây dựng, nhập học, cầu tài; kỵ an táng" },
+  { name: "Quỷ", full_name: "Quỷ Kim Dương", animal: "Dê", element: "Kim", good: false, description: "Hung tú - Kỵ hầu hết mọi việc, chỉ hợp an táng" },
+  { name: "Liễu", full_name: "Liễu Thổ Chương", animal: "Chương (hoẵng)", element: "Thổ", good: false, description: "Hung tú - Kỵ xây dựng, cưới hỏi, an táng" },
+  { name: "Tinh", full_name: "Tinh Nhật Mã", animal: "Ngựa", element: "Nhật", good: false, description: "Hung tú - Kỵ cưới hỏi, đào ao; tạm được cho xây dựng" },
+  { name: "Trương", full_name: "Trương Nguyệt Lộc", animal: "Nai", element: "Nguyệt", good: true, description: "Cát tú - Tốt cho xây dựng, cưới hỏi, khai trương" },
+  { name: "Dực", full_name: "Dực Hỏa Xà", animal: "Rắn", element: "Hỏa", good: false, description: "Hung tú - Kỵ xây dựng, cưới hỏi, an táng" },
+  { name: "Chẩn", full_name: "Chẩn Thủy Dẫn", animal: "Giun", element: "Thủy", good: true, description: "Cát tú - Tốt cho cưới hỏi, xây dựng, khai trương, xuất hành" }
 ];
 
 // Direction names (8 hướng)
 export const DIRECTIONS = ["Bắc", "Đông Bắc", "Đông", "Đông Nam", "Nam", "Tây Nam", "Tây", "Tây Bắc"];
 
-// Ngọc Hạp Thông Thư (Direction by day Chi)
+/**
+ * @deprecated Thực nghiệm (experimental) - chưa có nguồn đối chiếu. Không còn dùng trong getFullInfo.
+ */
 export const DIRECTION_MAP: Record<string, { good: string[], bad: string[] }> = {
   "Tý": { good: ["Đông", "Tây", "Nam"], bad: ["Bắc", "Đông Bắc", "Tây Bắc", "Đông Nam", "Tây Nam"] },
   "Sửu": { good: ["Đông", "Nam", "Tây"], bad: ["Bắc", "Đông Bắc", "Tây Bắc", "Đông Nam", "Tây Nam"] },
@@ -278,9 +293,10 @@ export const DIRECTION_MAP: Record<string, { good: string[], bad: string[] }> = 
   "Hợi": { good: ["Đông", "Nam", "Bắc"], bad: ["Tây", "Đông Bắc", "Tây Bắc", "Đông Nam", "Tây Nam"] }
 };
 
-// Hướng Thần Tài, Hỷ Thần, Phúc Thần theo Can Ngày
-export const WEALTH_GOD_DIR = ["Đông Bắc", "Đông", "Đông Nam", "Nam", "Nam", "Tây Nam", "Tây", "Tây Bắc", "Bắc", "Bắc"];
-export const JOY_GOD_DIR = ["Đông Nam", "Đông Nam", "Nam", "Nam", "Đông Bắc", "Đông", "Tây Bắc", "Tây", "Tây Nam", "Tây"];
+// Hướng Hỷ Thần, Tài Thần theo Can ngày (Giáp → Quý)
+export const JOY_GOD_DIR = ["Đông Bắc", "Tây Bắc", "Tây Nam", "Nam", "Đông Nam", "Đông Bắc", "Tây Bắc", "Tây Nam", "Nam", "Đông Nam"];
+export const WEALTH_GOD_DIR = ["Đông Nam", "Đông Nam", "Đông", "Đông", "Bắc", "Nam", "Tây Nam", "Tây Nam", "Tây", "Tây Bắc"];
+/** Hướng Phúc Thần theo Can ngày - CHƯA được đối chiếu nguồn, giữ nguyên từ v1.x. */
 export const FORTUNE_GOD_DIR = ["Bắc", "Tây Nam", "Đông Nam", "Đông", "Đông Bắc", "Nam", "Tây", "Tây Bắc", "Tây Nam", "Đông Nam"];
 
 // Travel hours by Ly Thuan Phong
@@ -301,5 +317,5 @@ export const TRAVEL_HOURS_LY: Record<number, number[]> = {
 
 // Constants
 export const PI = Math.PI;
-export const FIRST_DAY = 2378497; // jdn(25, 1, 1800)
-export const LAST_DAY = 2524502; // jdn(31, 12, 2199)
+export const FIRST_DAY = 2378521; // jdn(25, 1, 1800) - Tết Canh Thân 1800 (v1.x ghi nhầm 2378497 = 1/1/1800)
+export const LAST_DAY = 2524593; // jdn(31, 12, 2199) (v1.x ghi nhầm 2524502 = 1/10/2199)

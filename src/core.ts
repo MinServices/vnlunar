@@ -4,7 +4,7 @@
  */
 
 import type { LunarDate } from './types';
-import { TK19, TK20, TK21, TK22, PI } from './constants';
+import { TK19, TK20, TK21, TK22, PI, FIRST_DAY, LAST_DAY } from './constants';
 
 /**
  * Integer part of a number
@@ -163,10 +163,17 @@ export function get_leap_month_offset(a11: number, timeZone: number): number {
  */
 export function convert_solar_to_lunar(dd: number, mm: number, yy: number, timeZone: number): LunarDate {
   const dayNumber = jdn(dd, mm, yy);
-  const k = INT((dayNumber - 2415021.076998695) / 29.530588853);
+  // Tìm k sao cho newMoon(k+1) <= dayNumber < newMoon(k+2).
+  // (v1.x chỉ thử k+1 rồi k nên có thể ra ngày âm <= 0 ở một số ngày biên.)
+  let k = INT((dayNumber - 2415021.076998695) / 29.530588853);
   let monthStart = get_new_moon_day(k + 1, timeZone);
-  if (monthStart > dayNumber) {
-    monthStart = get_new_moon_day(k, timeZone);
+  while (monthStart > dayNumber) {
+    k--;
+    monthStart = get_new_moon_day(k + 1, timeZone);
+  }
+  while (get_new_moon_day(k + 2, timeZone) <= dayNumber) {
+    k++;
+    monthStart = get_new_moon_day(k + 1, timeZone);
   }
 
   let a11 = get_lunar_month_11(yy, timeZone);
@@ -215,15 +222,138 @@ export function convert_solar_to_lunar(dd: number, mm: number, yy: number, timeZ
 
 /**
  * Get lunar date from solar date
- * Main conversion function
+ * Main conversion function.
+ *
+ * - Không truyền `timeZone` và ngày nằm trong 25/01/1800..31/12/2199: tra bảng
+ *   TK19..TK22 của Hồ Ngọc Đức (đúng với lịch đã ban hành, kể cả giai đoạn
+ *   trước 1968 dùng giờ UTC+8).
+ * - Ngoài khoảng đó, hoặc khi truyền `timeZone` tường minh: tính thiên văn.
  * @param dd Day
  * @param mm Month
  * @param yyyy Year
+ * @param timeZone (tùy chọn) ép dùng thuật toán thiên văn với múi giờ này
  * @returns LunarDate object
  */
-export function get_lunar_date(dd: number, mm: number, yyyy: number): LunarDate {
-  const timeZone = 7.0; // Vietnam timezone
+export function get_lunar_date(dd: number, mm: number, yyyy: number, timeZone?: number): LunarDate {
+  if (timeZone === undefined) {
+    const fromTable = get_lunar_date_from_table(dd, mm, yyyy);
+    if (fromTable) return fromTable;
+    timeZone = 7.0; // Vietnam timezone
+  }
   return convert_solar_to_lunar(dd, mm, yyyy, timeZone);
+}
+
+/**
+ * Tra ngày âm từ bảng TK19..TK22 (1800-2199).
+ * @returns LunarDate hoặc null nếu nằm ngoài phạm vi bảng
+ */
+export function get_lunar_date_from_table(dd: number, mm: number, yyyy: number): LunarDate | null {
+  const jd = jdn(dd, mm, yyyy);
+  if (jd < FIRST_DAY || jd > LAST_DAY) return null;
+  let ly = get_year_info(yyyy);
+  if (jd < ly[0].jd) {
+    if (yyyy - 1 < 1800) return null;
+    ly = get_year_info(yyyy - 1);
+  }
+  let i = ly.length - 1;
+  while (i > 0 && jd < ly[i].jd) {
+    i--;
+  }
+  const off = jd - ly[i].jd;
+  return { day: 1 + off, month: ly[i].month, year: ly[i].year, leap: ly[i].leap, jd };
+}
+
+/**
+ * Chuyển âm lịch sang dương lịch bằng thuật toán thiên văn (port từ Hồ Ngọc Đức).
+ * @returns JDN của ngày dương, hoặc null nếu ngày âm không tồn tại
+ */
+function lunar_to_jd_astronomical(lunarDay: number, lunarMonth: number, lunarYear: number, lunarLeap: number, timeZone: number): number | null {
+  let a11: number, b11: number;
+  if (lunarMonth < 11) {
+    a11 = get_lunar_month_11(lunarYear - 1, timeZone);
+    b11 = get_lunar_month_11(lunarYear, timeZone);
+  } else {
+    a11 = get_lunar_month_11(lunarYear, timeZone);
+    b11 = get_lunar_month_11(lunarYear + 1, timeZone);
+  }
+  const k = INT(0.5 + (a11 - 2415021.076998695) / 29.530588853);
+  let off = lunarMonth - 11;
+  if (off < 0) off += 12;
+  if (b11 - a11 > 365) {
+    const leapOff = get_leap_month_offset(a11, timeZone);
+    let leapMonth = leapOff - 2;
+    if (leapMonth < 0) leapMonth += 12;
+    if (lunarLeap !== 0 && lunarMonth !== leapMonth) {
+      return null;
+    } else if (lunarLeap !== 0 || off >= leapOff) {
+      off += 1;
+    }
+  } else if (lunarLeap !== 0) {
+    return null;
+  }
+  const monthStart = get_new_moon_day(k + off, timeZone);
+  const nextMonthStart = get_new_moon_day(k + off + 1, timeZone);
+  if (lunarDay > nextMonthStart - monthStart) return null;
+  return monthStart + lunarDay - 1;
+}
+
+/**
+ * Chuyển âm lịch sang dương lịch bằng bảng TK19..TK22.
+ * @returns JDN, null nếu ngày âm không tồn tại, undefined nếu năm nằm ngoài bảng
+ */
+function lunar_to_jd_table(lunarDay: number, lunarMonth: number, lunarYear: number, lunarLeap: number): number | null | undefined {
+  if (lunarYear < 1800 || lunarYear > 2199) return undefined;
+  const ly = get_year_info(lunarYear);
+  const lengths = get_year_month_lengths(lunarYear);
+  for (let i = 0; i < ly.length; i++) {
+    if (ly[i].month === lunarMonth && ly[i].leap === (lunarLeap ? 1 : 0)) {
+      if (lunarDay > lengths[i]) return null;
+      return ly[i].jd + lunarDay - 1;
+    }
+  }
+  return null;
+}
+
+/**
+ * Convert lunar date to solar date
+ * @param lunarDay Lunar day (1-30)
+ * @param lunarMonth Lunar month (1-12)
+ * @param lunarYear Lunar year
+ * @param lunarLeap 1 nếu là tháng nhuận
+ * @param timeZone (tùy chọn) ép dùng thuật toán thiên văn với múi giờ này
+ * @returns [day, month, year] hoặc null nếu ngày âm không tồn tại
+ */
+export function convert_lunar_to_solar(
+  lunarDay: number,
+  lunarMonth: number,
+  lunarYear: number,
+  lunarLeap: number = 0,
+  timeZone?: number
+): [number, number, number] | null {
+  if (lunarDay < 1 || lunarDay > 30 || lunarMonth < 1 || lunarMonth > 12) return null;
+  let jd: number | null | undefined = undefined;
+  if (timeZone === undefined) {
+    jd = lunar_to_jd_table(lunarDay, lunarMonth, lunarYear, lunarLeap);
+  }
+  if (jd === undefined) {
+    jd = lunar_to_jd_astronomical(lunarDay, lunarMonth, lunarYear, lunarLeap, timeZone ?? 7.0);
+  }
+  return jd === null ? null : jdn2date(jd);
+}
+
+/**
+ * Get solar date from lunar date (alias thân thiện của convert_lunar_to_solar)
+ * @returns { day, month, year, jd } hoặc null nếu ngày âm không tồn tại
+ */
+export function get_solar_date(
+  lunarDay: number,
+  lunarMonth: number,
+  lunarYear: number,
+  lunarLeap: number = 0
+): { day: number; month: number; year: number; jd: number } | null {
+  const r = convert_lunar_to_solar(lunarDay, lunarMonth, lunarYear, lunarLeap);
+  if (!r) return null;
+  return { day: r[0], month: r[1], year: r[2], jd: jdn(r[0], r[1], r[2]) };
 }
 
 /**
@@ -303,17 +433,38 @@ function decode_lunar_year(yy: number, k: number): LunarDate[] {
  * @returns Array of LunarDate
  */
 export function get_year_info(yyyy: number): LunarDate[] {
-  let yearCode: number;
-  if (yyyy < 1900) {
-    yearCode = TK19[yyyy - 1800];
-  } else if (yyyy < 2000) {
-    yearCode = TK20[yyyy - 1900];
-  } else if (yyyy < 2100) {
-    yearCode = TK21[yyyy - 2000];
-  } else {
-    yearCode = TK22[yyyy - 2100];
+  return decode_lunar_year(yyyy, get_year_code(yyyy));
+}
+
+/**
+ * Mã năm trong bảng TK19..TK22
+ */
+function get_year_code(yyyy: number): number {
+  if (yyyy < 1800 || yyyy > 2199) {
+    throw new RangeError(`Year ${yyyy} is outside the lunar table range 1800-2199`);
   }
-  return decode_lunar_year(yyyy, yearCode);
+  if (yyyy < 1900) return TK19[yyyy - 1800];
+  if (yyyy < 2000) return TK20[yyyy - 1900];
+  if (yyyy < 2100) return TK21[yyyy - 2000];
+  return TK22[yyyy - 2100];
+}
+
+/**
+ * Độ dài (29/30 ngày) của từng tháng trong năm âm, cùng thứ tự với get_year_info
+ */
+export function get_year_month_lengths(yyyy: number): number[] {
+  const k = get_year_code(yyyy);
+  const monthLengths = [29, 30];
+  const regular: number[] = [];
+  let j = k >> 4;
+  for (let i = 0; i < 12; i++) {
+    regular[12 - i - 1] = monthLengths[j & 0x1];
+    j >>= 1;
+  }
+  const leapMonth = k & 0xf;
+  if (leapMonth === 0) return regular;
+  const leapLength = monthLengths[(k >> 16) & 0x1];
+  return [...regular.slice(0, leapMonth), leapLength, ...regular.slice(leapMonth)];
 }
 
 /**

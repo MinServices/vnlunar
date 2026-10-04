@@ -125,7 +125,7 @@ assert(yearElement.animal.length > 0, 'Con giáp phải có giá trị');
 
 section('3. 12 SAO KIẾN TRỪ (12 Day Officers)');
 
-const stars12 = vnLunar.get_12_stars(lunar.day, lunar.month);
+const stars12 = vnLunar.get_12_stars(jd);
 console.log('  Sao: ' + stars12.name);
 console.log('  Trạng thái: ' + stars12.status);
 console.log('  Màu: ' + stars12.color);
@@ -155,7 +155,7 @@ assert(['auspicious', 'inauspicious'].indexOf(gods12.type) >= 0, 'Loại phải 
 
 section('5. THẬP NHỊ TRỰC (12 Day Construction)');
 
-const constructions = vnLunar.get_12_constructions(lunar.day, lunar.month);
+const constructions = vnLunar.get_12_constructions(jd);
 console.log('  Trực: ' + constructions.name);
 console.log('  Tốt cho: ' + constructions.good_for.join(', '));
 console.log('  Xấu cho: ' + constructions.bad_for.join(', '));
@@ -238,7 +238,7 @@ assert(relation.length > 0, 'Quan hệ Ngũ Hành phải có giá trị');
 
 section('9. LOẠI NGÀY (HOÀNG ĐẠO / HẮC ĐẠO)');
 
-const dayType = vnLunar.get_day_type(lunar.day, lunar.month);
+const dayType = vnLunar.get_day_type(jd);
 console.log('  Loại ngày: ' + dayType.type);
 console.log('  Sao: ' + dayType.star);
 console.log('  Tốt: ' + (dayType.good ? 'Có' : 'Không'));
@@ -430,9 +430,8 @@ console.log('  Nạp Âm: ' + fullInfo.nayin.name);
 console.log('\n  === LOẠI NGÀY ===');
 console.log('  ' + fullInfo.day_type.type + ' - ' + fullInfo.day_type.desc);
 
-console.log('\n  === HƯỚNG ===');
-console.log('  Hướng tốt: ' + fullInfo.directions.good_text);
-console.log('  Hướng xấu: ' + fullInfo.directions.bad_text);
+console.log('\n  === TUỔI XUNG ===');
+console.log('  ' + fullInfo.conflicting_ages.description);
 
 console.log('\n  === THẦN ===');
 console.log('  ' + fullInfo.god_directions.description);
