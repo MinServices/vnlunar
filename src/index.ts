@@ -171,6 +171,7 @@ export function getFullInfo(dd: number, mm: number, yyyy: number, options?: Alma
     day_type: almanac.get_day_type(jd, opts),
     conflicting_ages: direction.get_conflicting_ages(jd, lunar.year),
     god_directions: direction.get_god_directions(jd),
+    directions: direction.get_direction_info(jd),
     solar_term: term.name,
     solar_term_info: term,
     auspicious_hours: calendar.get_auspicious_hours(jd),

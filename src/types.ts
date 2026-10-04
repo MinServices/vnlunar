@@ -338,6 +338,11 @@ export interface FullDateInfo {
   day_type: DayTypeInfo;
   conflicting_ages: ConflictingAgeInfo;
   god_directions: GodDirectionInfo;
+  /**
+   * Hướng xuất hành theo ngày (Ngọc Hạp Thông Thư).
+   * @deprecated Khuyến nghị dùng god_directions hoặc get_travel_direction().
+   */
+  directions: DirectionInfo;
   solar_term: string;
   solar_term_info: SolarTermInfo;
   auspicious_hours: string;
