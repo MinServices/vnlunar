@@ -61,3 +61,15 @@ for (let i = 0; i < 60; i++) {
 }
 fs.writeFileSync(path.join(OUT, 'nayin.json'), JSON.stringify({ source: 'Lục thập hoa giáp nạp âm (standard)', items: nayin }, null, 1));
 console.log('nayin.json: 60 items');
+
+// ---------------------------------------------------------------------------
+// 3. Đồng bộ toàn bộ fixtures (kể cả anchors.json, solar_terms.json viết tay) sang pyvnlunar
+// ---------------------------------------------------------------------------
+const PY_OUT = path.resolve(ROOT, '..', 'pyvnlunar', 'tests', 'fixtures');
+if (fs.existsSync(path.resolve(ROOT, '..', 'pyvnlunar'))) {
+  fs.mkdirSync(PY_OUT, { recursive: true });
+  for (const f of fs.readdirSync(OUT).filter((n) => n.endsWith('.json'))) {
+    fs.copyFileSync(path.join(OUT, f), path.join(PY_OUT, f));
+  }
+  console.log('synced fixtures ->', PY_OUT);
+}
