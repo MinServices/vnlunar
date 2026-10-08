@@ -38,7 +38,7 @@
     "typescript"
   ],
   "author": "Min",
-  "license": "Free for personal and non-commercial use",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/min9802/vnlunar"
