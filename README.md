@@ -228,7 +228,7 @@ print(f"Can Chi: {info['can_chi']['day']}")
 print(f"12 Sao: {info['stars_12']['name']}")
 ```
 
-Xem thêm: [**vnlunar Documentation**](https://github.com/Min9802/pyvnlunar)
+Xem thêm: [**vnlunar Documentation**](https://github.com/MinServices/pyvnlunar)
 
 ## 🎨 Demo
 
@@ -251,8 +251,8 @@ Mọi đóng góp đều được chào đón! Vui lòng tạo Pull Request ho�
 ## 📞 Liên Hệ
 
 - **Website**: https://vnlunar.min-services.com
-- **Repository**: https://github.com/Min9802/vnlunar
-- **Issues**: https://github.com/Min9802/vnlunar/issues
+- **Repository**: https://github.com/MinServices/vnlunar
+- **Issues**: https://github.com/MinServices/vnlunar/issues
 
 ---
 

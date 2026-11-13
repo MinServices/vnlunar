@@ -1,6 +1,6 @@
 {
   "name": "@min98/vnlunar",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Vietnamese Lunar Calendar Library - TypeScript version with modular architecture",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
@@ -41,7 +41,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/min9802/vnlunar"
+    "url": "https://github.com/MinServices/vnlunar"
   },
   "homepage": "https://vnlunar.min-services.com",
   "engines": {
